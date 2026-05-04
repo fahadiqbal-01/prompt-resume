@@ -6,8 +6,16 @@ import StepExperience from "./StepExperience";
 import StepSkills from "./StepSkills";
 import StepEducation from "./StepEducation";
 import StepCertifications from "./StepCertifications";
+import StepLanguages from "./StepLanguages";
 
-const STEPS = ["Personal", "Experience", "Skills", "Education", "Awards"];
+const STEPS = [
+  "Personal",
+  "Experience",
+  "Skills",
+  "Languages",
+  "Education",
+  "Awards",
+];
 
 export default function StepForm({ data, onChange, onGenerate, loading }) {
   const [step, setStep] = useState(0);
@@ -36,13 +44,15 @@ export default function StepForm({ data, onChange, onGenerate, loading }) {
       case 2:
         return data.skills.length > 0;
       case 3:
+        return (data.languages || []).length > 0;
+      case 4:
         return (
           data.education.length > 0 &&
           data.education.every(
             (ed) => ed.school?.trim() && ed.degree?.trim() && ed.year?.trim(),
           )
         );
-      case 4:
+      case 5:
         return (data.certifications || []).length > 0;
       default:
         return true;
@@ -55,6 +65,7 @@ export default function StepForm({ data, onChange, onGenerate, loading }) {
     <StepPersonal key="p" data={data} onChange={onChange} />,
     <StepExperience key="e" data={data} onChange={onChange} />,
     <StepSkills key="s" data={data} onChange={onChange} />,
+    <StepLanguages key="l" data={data} onChange={onChange} />,
     <StepEducation key="ed" data={data} onChange={onChange} />,
     <StepCertifications key="c" data={data} onChange={onChange} />,
   ];

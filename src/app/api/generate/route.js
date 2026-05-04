@@ -17,10 +17,11 @@ Rewrite the provided resume data to be high-impact, professional, and optimized 
 TASKS:
 1. REWRITE: Use strong action verbs (Spearheaded, Optimized, Engineered). Fix all grammar and punctuation.
 2. SKILLS POLISHING: Clean up and properly capitalize all skills (e.g., "html" to "HTML", "react" to "React", "css" to "CSS").
-3. ATS OPTIMIZATION: Match keywords based on the Target Role: ${data.targetRole}.
-4. ANALYSIS: Score the resume (0-100) and identify missing certifications or tools common in this industry.
-5. LAYOUT: Based on content length, suggest if it should be a "minimal" or "modern" template.
-6. CERTIFICATIONS: Clean up the titles of awards and certifications to be professionally formatted.
+3. LANGUAGES: Ensure language names are capitalized and proficiency levels are standard.
+4. ATS OPTIMIZATION: Match keywords based on the Target Role: ${data.targetRole}.
+5. ANALYSIS: Score the resume (0-100) and identify missing certifications or tools common in this industry.
+6. LAYOUT: Based on content length, suggest if it should be a "minimal" or "modern" template.
+7. CERTIFICATIONS: Clean up the titles of awards and certifications to be professionally formatted.
 
 Return ONLY valid JSON with this exact structure:
 {
@@ -34,6 +35,7 @@ Return ONLY valid JSON with this exact structure:
     }
   ],
   "aiSkills": ["HTML", "CSS", "JavaScript"],
+  "aiLanguages": [{ "language": "English", "level": "Native" }],
   "aiCertifications": ["Professionally formatted certification 1", "Award 2"],
   "analysis": {
     "score": number,
@@ -51,6 +53,7 @@ Role: ${data.targetRole}
 Summary: ${data.summary}
 Experience: ${JSON.stringify(data.experience)}
 Skills: ${data.skills ? data.skills.join(", ") : "None"}
+Languages: ${data.languages ? JSON.stringify(data.languages) : "None"}
 Certifications: ${data.certifications ? data.certifications.join(", ") : "None"}
 `;
 

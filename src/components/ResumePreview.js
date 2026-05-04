@@ -18,6 +18,9 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
     : [];
   const displaySkills =
     isAI && data.aiSkills ? data.aiSkills : data.skills || [];
+  const displayLanguages =
+    isAI && data.aiLanguages ? data.aiLanguages : data.languages || [];
+
   const displayEducation = data.education || [];
   const displayCerts =
     isAI && data.aiCertifications
@@ -35,7 +38,7 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-[210mm] mx-auto">
       <div className="flex justify-between items-center">
         <p className="text-xs text-neutral-500 uppercase tracking-widest">
           {isAI ? "AI-Enhanced Preview" : "Live Preview"}
@@ -123,7 +126,7 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
         ref={ref}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="bg-white text-[#171717] shadow-2xl pb-12 overflow-hidden"
+        className="bg-white text-[#171717] shadow-2xl pb-20 overflow-hidden w-full min-h-[297mm]"
       >
         <div className="bg-[#0F52BA] py-8 px-10 text-center text-white">
           <h1 className="text-3xl font-extrabold uppercase tracking-widest mb-1.5">
@@ -229,6 +232,26 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {displayLanguages.length > 0 && (
+            <div>
+              <SectionHeader title="Language Proficiency" />
+              <div className="grid grid-cols-2 gap-y-1.5 pl-5">
+                {displayLanguages.map((lang, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 text-[#404040]"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0F52BA]"></span>
+                    <span className="font-bold text-neutral-800">
+                      {lang.language}:
+                    </span>
+                    <span>{lang.level}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

@@ -13,6 +13,7 @@ const defaultData = {
   skills: [],
   education: [{ school: "", degree: "", year: "" }],
   certifications: [],
+  languages: [],
 };
 
 export default function Home() {
@@ -66,11 +67,21 @@ export default function Home() {
     !!aiData ||
     formData.name.trim() !== "" ||
     formData.email.trim() !== "" ||
+    formData.phone.trim() !== "" ||
+    formData.targetRole.trim() !== "" ||
     formData.summary.trim() !== "" ||
     formData.skills.length > 0 ||
     formData.experience.some(
-      (exp) => exp.company.trim() !== "" || exp.role.trim() !== "",
-    );
+      (exp) =>
+        exp.company.trim() !== "" ||
+        exp.role.trim() !== "" ||
+        exp.description.trim() !== "",
+    ) ||
+    formData.education.some(
+      (ed) => ed.school.trim() !== "" || ed.degree.trim() !== "",
+    ) ||
+    (formData.certifications || []).length > 0 ||
+    (formData.languages || []).length > 0;
 
   return (
     <main
@@ -92,7 +103,7 @@ export default function Home() {
           <ResumePreview
             data={aiData ?? formData}
             isAI={!!aiData}
-            onAddSkill={handleAddSkillFromAI} 
+            onAddSkill={handleAddSkillFromAI}
           />
         </div>
       )}
