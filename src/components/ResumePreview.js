@@ -1,34 +1,13 @@
 "use client";
 import { useRef } from "react";
 import { motion } from "framer-motion";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { ResumePDF } from "./ResumePDF";
 
 export default function ResumePreview({ data, isAI, onAddSkill }) {
   const ref = useRef(null);
 
-  const handleExport = async () => {
-    const html2canvas = (await import("html2canvas")).default;
-    const jsPDF = (await import("jspdf")).default;
-
-    const canvas = await html2canvas(ref.current, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      onclone: (clonedDoc) => {
-        const el = clonedDoc.getElementById("resume-preview-root");
-        if (el) el.style.color = "#171717";
-      },
-    });
-    const imgData = canvas.toDataURL("image/png");
-
-    const pdf = new jsPDF({
-      unit: "px",
-      format: [canvas.width / 2, canvas.height / 2],
-    });
-
-    pdf.addImage(imgData, "PNG", 0, 0, canvas.width / 2, canvas.height / 2);
-    pdf.save(`${data.name || "resume"}.pdf`);
-  };
-
+  // Data helpers - Prioritize AI polished fields
   const displaySummary = isAI ? data.aiSummary : data.summary;
   const displayExperience = Array.isArray(
     isAI ? data.aiExperience : data.experience,
@@ -37,9 +16,13 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
       ? data.aiExperience
       : data.experience
     : [];
-  const displaySkills = data.skills || [];
+  const displaySkills =
+    isAI && data.aiSkills ? data.aiSkills : data.skills || [];
   const displayEducation = data.education || [];
-
+  const displayCerts =
+    isAI && data.aiCertifications
+      ? data.aiCertifications
+      : data.certifications || [];
   const analysis = data.analysis || null;
 
   const SectionHeader = ({ title }) => (
@@ -47,7 +30,7 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
       <h2 className="text-[13px] font-bold uppercase tracking-wider text-[#171717] whitespace-nowrap">
         {title}
       </h2>
-      <div className="flex-grow h-[1.5px] bg-[#0F52BA]"></div>
+      <div className="grow h-[1.5px] bg-[#0F52BA]"></div>
     </div>
   );
 
@@ -57,14 +40,16 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
         <p className="text-xs text-neutral-500 uppercase tracking-widest">
           {isAI ? "AI-Enhanced Preview" : "Live Preview"}
         </p>
-        <button
-          onClick={handleExport}
-          className="px-4 py-1.5 rounded-lg border border-neutral-700 text-xs hover:border-[#0F52BA] hover:text-[#0F52BA] transition"
-        >
-          Export PDF
-        </button>
-      </div>
 
+        {/* Updated A4 PDF Export Button */}
+        <PDFDownloadLink
+          document={<ResumePDF data={data} isAI={isAI} />}
+          fileName={`${data.name || "resume"}.pdf`}
+          className="px-4 py-1.5 rounded-lg bg-[#0F52BA] text-white text-xs font-bold hover:bg-blue-800 transition"
+        >
+          {({ loading }) => (loading ? "Generating..." : "Export A4 PDF")}
+        </PDFDownloadLink>
+      </div>
 
       {isAI && analysis && (
         <motion.div
@@ -94,11 +79,9 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
               </span>
             )}
           </div>
-
           <p className="text-xs text-neutral-400 leading-relaxed italic">
             "{analysis.feedback}"
           </p>
-
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div>
               <p className="text-[10px] font-bold text-neutral-500 uppercase mb-2">
@@ -109,9 +92,7 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
                   <button
                     key={i}
                     onClick={() => onAddSkill && onAddSkill(skill)}
-                    className="text-[9px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded 
-                               hover:bg-emerald-500 hover:text-black transition-colors cursor-pointer border border-emerald-500/20"
-                    title="Click to add to resume"
+                    className="text-[9px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded hover:bg-emerald-500 hover:text-black transition-colors cursor-pointer border border-emerald-500/20"
                   >
                     + {skill}
                   </button>
@@ -137,9 +118,9 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
         </motion.div>
       )}
 
+      {/* Visual HTML Preview Card (Always visible) */}
       <motion.div
         ref={ref}
-        id="resume-preview-root"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="bg-white text-[#171717] shadow-2xl pb-12 overflow-hidden"
@@ -193,7 +174,7 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
                     <ul className="text-neutral-700 list-disc pl-5 mt-2 space-y-1">
                       {exp?.description
                         ?.split("\n")
-                        .filter((line) => line.trim() !== "")
+                        .filter((l) => l.trim() !== "")
                         .map((line, idx) => (
                           <li key={idx}>{line.replace(/^[-•]\s*/, "")}</li>
                         ))}
@@ -225,12 +206,27 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
             </div>
           )}
 
+          {displayCerts.length > 0 && (
+            <div>
+              <SectionHeader title="Certifications & Awards" />
+              <ul className="list-disc pl-5 text-[#404040] space-y-1.5">
+                {displayCerts.map((cert, i) => (
+                  <li key={i} className="leading-tight">
+                    {cert}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {displaySkills.length > 0 && (
             <div>
               <SectionHeader title="Key Skills" />
-              <ul className="list-disc pl-5 text-[#404040] space-y-1.5 grid grid-cols-2 grid-rows-4 ">
+              <ul className="list-disc pl-5 text-[#404040] grid grid-cols-2 gap-y-1.5">
                 {displaySkills.map((s, i) => (
-                  <li key={i}>{s}</li>
+                  <li key={i} className={`${!isAI ? "capitalize" : ""}`}>
+                    {s}
+                  </li>
                 ))}
               </ul>
             </div>

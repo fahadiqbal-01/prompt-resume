@@ -12,6 +12,7 @@ const defaultData = {
   experience: [{ company: "", role: "", duration: "", description: "" }],
   skills: [],
   education: [{ school: "", degree: "", year: "" }],
+  certifications: [],
 };
 
 export default function Home() {
@@ -19,9 +20,6 @@ export default function Home() {
   const [aiData, setAiData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  /**
-   * Function to add a skill from the AI analysis directly to the form data
-   */
   const handleAddSkillFromAI = (newSkill) => {
     setFormData((prev) => {
       // Prevent adding duplicate skills
@@ -55,7 +53,6 @@ export default function Home() {
       }
 
       const json = await res.json();
-      // Merge original form data with the new AI fields
       setAiData({ ...formData, ...json });
     } catch (err) {
       console.error("Generation Error:", err.message);
@@ -65,10 +62,23 @@ export default function Home() {
     }
   };
 
+  const hasStarted =
+    !!aiData ||
+    formData.name.trim() !== "" ||
+    formData.email.trim() !== "" ||
+    formData.summary.trim() !== "" ||
+    formData.skills.length > 0 ||
+    formData.experience.some(
+      (exp) => exp.company.trim() !== "" || exp.role.trim() !== "",
+    );
+
   return (
-    <main className="min-h-screen bg-neutral-950 text-white flex">
-      {/* Left Column — Form */}
-      <div className="w-full md:w-1/2 p-6 overflow-y-auto border-r border-neutral-800">
+    <main
+      className={`min-h-screen bg-neutral-950 text-white flex transition-all duration-500 ${!hasStarted ? "justify-center" : ""}`}
+    >
+      <div
+        className={`p-6 overflow-y-auto transition-all duration-500 ${hasStarted ? "w-full md:w-1/2 border-r border-neutral-800" : "w-full max-w-xl"}`}
+      >
         <StepForm
           data={formData}
           onChange={setFormData}
@@ -77,14 +87,15 @@ export default function Home() {
         />
       </div>
 
-      {/* Right Column — Preview & Feedback */}
-      <div className="hidden md:block w-1/2 p-6 overflow-y-auto bg-neutral-900">
-        <ResumePreview
-          data={aiData ?? formData}
-          isAI={!!aiData}
-          onAddSkill={handleAddSkillFromAI} // Passed the new handler as a prop[cite: 1]
-        />
-      </div>
+      {hasStarted && (
+        <div className="hidden md:block w-1/2 p-6 overflow-y-auto bg-neutral-900">
+          <ResumePreview
+            data={aiData ?? formData}
+            isAI={!!aiData}
+            onAddSkill={handleAddSkillFromAI} 
+          />
+        </div>
+      )}
     </main>
   );
 }

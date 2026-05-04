@@ -3,8 +3,6 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   try {
     const data = await req.json();
-
-    // 1. Validation
     if (!data.name || !data.experience?.length) {
       return NextResponse.json(
         { error: "Missing required resume fields" },
@@ -12,16 +10,17 @@ export async function POST(req) {
       );
     }
 
-    // 2. The Advanced Prompt
     const prompt = `
 You are an expert Resume Strategist and ATS (Applicant Tracking System) Specialist.
 Rewrite the provided resume data to be high-impact, professional, and optimized for hiring.
 
 TASKS:
 1. REWRITE: Use strong action verbs (Spearheaded, Optimized, Engineered). Fix all grammar and punctuation.
-2. ATS OPTIMIZATION: Match keywords based on the Target Role: ${data.targetRole}.
-3. ANALYSIS: Score the resume (0-100) and identify missing certifications or tools common in this industry.
-4. LAYOUT: Based on content length, suggest if it should be a "minimal" or "modern" template.
+2. SKILLS POLISHING: Clean up and properly capitalize all skills (e.g., "html" to "HTML", "react" to "React", "css" to "CSS").
+3. ATS OPTIMIZATION: Match keywords based on the Target Role: ${data.targetRole}.
+4. ANALYSIS: Score the resume (0-100) and identify missing certifications or tools common in this industry.
+5. LAYOUT: Based on content length, suggest if it should be a "minimal" or "modern" template.
+6. CERTIFICATIONS: Clean up the titles of awards and certifications to be professionally formatted.
 
 Return ONLY valid JSON with this exact structure:
 {
@@ -34,6 +33,8 @@ Return ONLY valid JSON with this exact structure:
       "description": "Professional bullet points with quantified results"
     }
   ],
+  "aiSkills": ["HTML", "CSS", "JavaScript"],
+  "aiCertifications": ["Professionally formatted certification 1", "Award 2"],
   "analysis": {
     "score": number,
     "feedback": "string (concise audit)",
@@ -49,7 +50,8 @@ Name: ${data.name}
 Role: ${data.targetRole}
 Summary: ${data.summary}
 Experience: ${JSON.stringify(data.experience)}
-Skills: ${data.skills ? data.skills.join(", ") : ""}
+Skills: ${data.skills ? data.skills.join(", ") : "None"}
+Certifications: ${data.certifications ? data.certifications.join(", ") : "None"}
 `;
 
     if (!process.env.OPENROUTER_API_KEY) {
@@ -86,7 +88,6 @@ Skills: ${data.skills ? data.skills.join(", ") : ""}
 
     if (!text) throw new Error("No content returned from AI");
 
-    // 3. Clean and Parse
     text = text.replace(/<think>[\s\S]*?<\/think>/g, "");
     text = text.replace(/```json|```/g, "").trim();
 
