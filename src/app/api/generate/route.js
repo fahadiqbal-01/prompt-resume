@@ -4,7 +4,7 @@ export async function POST(req) {
   try {
     const data = await req.json();
 
-    // 1. Basic validation to prevent malformed prompts
+    // 1. Validation
     if (!data.name || !data.experience?.length) {
       return NextResponse.json(
         { error: "Missing required resume fields" },
@@ -12,26 +12,41 @@ export async function POST(req) {
       );
     }
 
+    // 2. The Advanced Prompt
     const prompt = `
-You are a professional resume writer.
-Rewrite the following resume data in a polished, professional tone.
-Return ONLY valid JSON, no markdown, no explanation:
+You are an expert Resume Strategist and ATS (Applicant Tracking System) Specialist.
+Rewrite the provided resume data to be high-impact, professional, and optimized for hiring.
 
+TASKS:
+1. REWRITE: Use strong action verbs (Spearheaded, Optimized, Engineered). Fix all grammar and punctuation.
+2. ATS OPTIMIZATION: Match keywords based on the Target Role: ${data.targetRole}.
+3. ANALYSIS: Score the resume (0-100) and identify missing certifications or tools common in this industry.
+4. LAYOUT: Based on content length, suggest if it should be a "minimal" or "modern" template.
+
+Return ONLY valid JSON with this exact structure:
 {
-  "aiSummary": "rewritten 2-3 sentence professional summary",
+  "aiSummary": "rewritten impactful summary",
   "aiExperience": [
     {
-      "company": "same company name",
-      "role": "same role",
-      "duration": "same duration",
-      "description": "rewritten bullet-style description"
+      "company": "string",
+      "role": "string",
+      "duration": "string",
+      "description": "Professional bullet points with quantified results"
     }
-  ]
+  ],
+  "analysis": {
+    "score": number,
+    "feedback": "string (concise audit)",
+    "suggestedSkills": ["skill1", "skill2"],
+    "missingSections": ["section1"],
+    "atsKeywords": ["keyword1", "keyword2"]
+  },
+  "layoutSuggestion": "minimal" | "modern"
 }
 
 Input data:
 Name: ${data.name}
-Target Role: ${data.targetRole}
+Role: ${data.targetRole}
 Summary: ${data.summary}
 Experience: ${JSON.stringify(data.experience)}
 Skills: ${data.skills ? data.skills.join(", ") : ""}
@@ -39,20 +54,19 @@ Skills: ${data.skills ? data.skills.join(", ") : ""}
 
     if (!process.env.OPENROUTER_API_KEY) {
       return NextResponse.json(
-        { error: "OpenRouter API key is missing from environment variables" },
+        { error: "API key is missing" },
         { status: 500 },
       );
     }
 
-    // 2. Direct fetch to OpenRouter API to bypass SDK validation bugs
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
       {
         method: "POST",
         headers: {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          "HTTP-Referer": "http://localhost:3000", // Required by OpenRouter
-          "X-Title": "Prompt Resume Builder", // Required by OpenRouter
+          "HTTP-Referer": "http://localhost:3000",
+          "X-Title": "Lazy Studio Resume Builder",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -70,39 +84,18 @@ Skills: ${data.skills ? data.skills.join(", ") : ""}
     const json = await response.json();
     let text = json.choices?.[0]?.message?.content;
 
-    if (!text) {
-      throw new Error("No content returned from AI");
-    }
+    if (!text) throw new Error("No content returned from AI");
 
-    // Log usage tokens if provided (non-streaming usage)
-    if (json.usage) {
-      console.log("Usage:", json.usage);
-    }
-
-    // 4. Clean up any markdown "thinking" or code blocks
-    text = text.replace(/<think>[\s\S]*?<\/think>/g, ""); // Remove DeepSeek thinking tags
+    // 3. Clean and Parse
+    text = text.replace(/<think>[\s\S]*?<\/think>/g, "");
     text = text.replace(/```json|```/g, "").trim();
 
-    try {
-      const parsed = JSON.parse(text);
-      return NextResponse.json(parsed);
-    } catch (parseError) {
-      console.error("Failed to parse AI response as JSON:", text);
-      return NextResponse.json(
-        {
-          error: "AI response was not valid JSON",
-          raw: text.substring(0, 100),
-        },
-        { status: 500 },
-      );
-    }
+    const parsed = JSON.parse(text);
+    return NextResponse.json(parsed);
   } catch (error) {
     console.error("Internal Route Error:", error);
     return NextResponse.json(
-      {
-        error: error.message || "Server failed to process the request",
-        details: error.toString(),
-      },
+      { error: error.message || "Server failed" },
       { status: 500 },
     );
   }
