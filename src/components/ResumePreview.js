@@ -5,7 +5,8 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ResumePDF } from "./ResumePDF";
 
 export default function ResumePreview({ data, isAI, onAddSkill }) {
-  const ref = useRef(null);
+  const containerRef = useRef(null);
+  const dragBoundaryRef = useRef(null);
 
   // Data helpers - Prioritize AI polished fields
   const displaySummary = isAI ? data.aiSummary : data.summary;
@@ -38,8 +39,11 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
   );
 
   return (
-    <div className="space-y-6 max-w-[210mm] mx-auto">
-      <div className="flex justify-between items-center">
+    <div
+      className="space-y-6 w-full max-w-[210mm] mx-auto h-full flex flex-col"
+      ref={containerRef}
+    >
+      <div className="flex justify-between items-center ">
         <p className="text-xs text-neutral-500 uppercase tracking-widest">
           {isAI ? "AI-Enhanced Preview" : "Live Preview"}
         </p>
@@ -122,140 +126,149 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
       )}
 
       {/* Visual HTML Preview Card (Always visible) */}
-      <motion.div
-        ref={ref}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="bg-white text-[#171717] shadow-2xl pb-20 overflow-hidden w-full min-h-[297mm]"
+      <div
+        ref={dragBoundaryRef}
+        className="relative flex-1 cursor-move overflow-hidden min-h-[500px] border border-dashed border-neutral-800 rounded-2xl bg-neutral-950/50"
       >
-        <div className="bg-[#0F52BA] py-8 px-10 text-center text-white">
-          <h1 className="text-3xl font-extrabold uppercase tracking-widest mb-1.5">
-            {data.name || "Your Name"}
-          </h1>
-          <p className="text-sm font-semibold tracking-wide">
-            {data.targetRole || "Target Role"}
-          </p>
-        </div>
+        <motion.div
+          drag
+          dragConstraints={dragBoundaryRef}
+          dragElastic={0.1}
+          dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          style={{ touchAction: "none" }}
+          className="bg-white text-[#171717] shadow-2xl pb-20 overflow-visible w-[210mm] min-h-[297mm] origin-top"
+        >
+          <div className="bg-[#0F52BA] py-8 px-10 text-center text-white">
+            <h1 className="text-3xl font-extrabold uppercase tracking-widest mb-1.5">
+              {data.name || "Your Name"}
+            </h1>
+            <p className="text-sm font-semibold tracking-wide">
+              {data.targetRole || "Target Role"}
+            </p>
+          </div>
 
-        <div className="text-center text-[#525252] py-4 text-xs font-medium">
-          <p>
-            {data.email || "hello@example.com"}
-            {data.phone && <span className="mx-2">|</span>}
-            {data.phone}
-          </p>
-        </div>
+          <div className="text-center text-[#525252] py-4 text-xs font-medium">
+            <p>
+              {data.email || "hello@example.com"}
+              {data.phone && <span className="mx-2">|</span>}
+              {data.phone}
+            </p>
+          </div>
 
-        <div className="px-10 text-[13px]">
-          {displaySummary && (
-            <div>
-              <SectionHeader title="Summary" />
-              <p className="text-[#404040] leading-relaxed text-justify">
-                {displaySummary}
-              </p>
-            </div>
-          )}
+          <div className="px-10 text-[13px]">
+            {displaySummary && (
+              <div>
+                <SectionHeader title="Summary" />
+                <p className="text-[#404040] leading-relaxed text-justify">
+                  {displaySummary}
+                </p>
+              </div>
+            )}
 
-          {displayExperience.length > 0 && (
-            <div>
-              <SectionHeader title="Work Experience" />
-              <div className="space-y-5">
-                {displayExperience.map((exp, i) => (
-                  <div key={i}>
-                    <div className="flex justify-between items-baseline mb-1">
-                      <p className="font-bold text-neutral-900 text-[14px]">
-                        {exp?.role}
-                        {exp?.company && (
-                          <span className="font-normal text-neutral-800">
-                            , {exp.company}
-                          </span>
-                        )}
-                      </p>
-                      <p className="text-neutral-800 font-medium text-xs whitespace-nowrap">
-                        {exp?.duration}
-                      </p>
+            {displayExperience.length > 0 && (
+              <div>
+                <SectionHeader title="Work Experience" />
+                <div className="space-y-5">
+                  {displayExperience.map((exp, i) => (
+                    <div key={i}>
+                      <div className="flex justify-between items-baseline mb-1">
+                        <p className="font-bold text-neutral-900 text-[14px]">
+                          {exp?.role}
+                          {exp?.company && (
+                            <span className="font-normal text-neutral-800">
+                              , {exp.company}
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-neutral-800 font-medium text-xs whitespace-nowrap">
+                          {exp?.duration}
+                        </p>
+                      </div>
+                      <ul className="text-neutral-700 list-disc pl-5 mt-2 space-y-1">
+                        {exp?.description
+                          ?.split("\n")
+                          .filter((l) => l.trim() !== "")
+                          .map((line, idx) => (
+                            <li key={idx}>{line.replace(/^[-•]\s*/, "")}</li>
+                          ))}
+                      </ul>
                     </div>
-                    <ul className="text-neutral-700 list-disc pl-5 mt-2 space-y-1">
-                      {exp?.description
-                        ?.split("\n")
-                        .filter((l) => l.trim() !== "")
-                        .map((line, idx) => (
-                          <li key={idx}>{line.replace(/^[-•]\s*/, "")}</li>
-                        ))}
-                    </ul>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {displayEducation.length > 0 && (
-            <div>
-              <SectionHeader title="Education" />
-              <div className="space-y-4">
-                {displayEducation.map((ed, i) => (
-                  <div key={i}>
-                    <div className="flex justify-between items-baseline">
-                      <p className="font-bold text-[#171717] text-[14px]">
-                        {ed?.degree}
-                      </p>
-                      <p className="text-[#262626] font-medium text-xs whitespace-nowrap">
-                        {ed?.year}
-                      </p>
+            {displayEducation.length > 0 && (
+              <div>
+                <SectionHeader title="Education" />
+                <div className="space-y-4">
+                  {displayEducation.map((ed, i) => (
+                    <div key={i}>
+                      <div className="flex justify-between items-baseline">
+                        <p className="font-bold text-[#171717] text-[14px]">
+                          {ed?.degree}
+                        </p>
+                        <p className="text-[#262626] font-medium text-xs whitespace-nowrap">
+                          {ed?.year}
+                        </p>
+                      </div>
+                      <p className="text-[#404040] mt-0.5">{ed?.school}</p>
                     </div>
-                    <p className="text-[#404040] mt-0.5">{ed?.school}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {displayCerts.length > 0 && (
-            <div>
-              <SectionHeader title="Certifications & Awards" />
-              <ul className="list-disc pl-5 text-[#404040] space-y-1.5">
-                {displayCerts.map((cert, i) => (
-                  <li key={i} className="leading-tight">
-                    {cert}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {displaySkills.length > 0 && (
-            <div>
-              <SectionHeader title="Key Skills" />
-              <ul className="list-disc pl-5 text-[#404040] grid grid-cols-2 gap-y-1.5">
-                {displaySkills.map((s, i) => (
-                  <li key={i} className={`${!isAI ? "capitalize" : ""}`}>
-                    {s}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {displayLanguages.length > 0 && (
-            <div>
-              <SectionHeader title="Language Proficiency" />
-              <div className="grid grid-cols-2 gap-y-1.5 pl-5">
-                {displayLanguages.map((lang, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-2 text-[#404040]"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0F52BA]"></span>
-                    <span className="font-bold text-neutral-800">
-                      {lang.language}:
-                    </span>
-                    <span>{lang.level}</span>
-                  </div>
-                ))}
+            {displayCerts.length > 0 && (
+              <div>
+                <SectionHeader title="Certifications & Awards" />
+                <ul className="list-disc pl-5 text-[#404040] space-y-1.5">
+                  {displayCerts.map((cert, i) => (
+                    <li key={i} className="leading-tight">
+                      {cert}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
-          )}
-        </div>
-      </motion.div>
+            )}
+
+            {displaySkills.length > 0 && (
+              <div>
+                <SectionHeader title="Key Skills" />
+                <ul className="list-disc pl-5 text-[#404040] grid grid-cols-2 gap-y-1.5">
+                  {displaySkills.map((s, i) => (
+                    <li key={i} className={`${!isAI ? "capitalize" : ""}`}>
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {displayLanguages.length > 0 && (
+              <div>
+                <SectionHeader title="Language Proficiency" />
+                <div className="grid grid-cols-2 gap-y-1.5 pl-5">
+                  {displayLanguages.map((lang, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 text-[#404040]"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#0F52BA]"></span>
+                      <span className="font-bold text-neutral-800">
+                        {lang.language}:
+                      </span>
+                      <span>{lang.level}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }

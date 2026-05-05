@@ -71,8 +71,20 @@ export default function StepForm({ data, onChange, onGenerate, loading }) {
   ];
 
   return (
-    <div className="space-y-6 max-w-lg">
-      <h1 className="text-2xl font-bold">AI Resume Builder</h1>
+    <div className="space-y-6 w-full  ">
+      <h1 className="text-2xl font-bold">
+        AI Resume Builder
+        <p className=" font-light text-sm text-white/70 mt-1 ">
+          Developed & Designed byㅤ
+          <a
+            href="https://fahadiqbal.vercel.app/"
+            target="_blank"
+            className=" underline text-emerald-500 "
+          >
+            Fahad Iqbal
+          </a>
+        </p>
+      </h1>
 
       <div className="flex gap-1 bg-neutral-900 p-1 rounded-xl">
         {STEPS.map((s, i) => (
@@ -81,8 +93,8 @@ export default function StepForm({ data, onChange, onGenerate, loading }) {
             onClick={() => (i <= step || isValid ? setStep(i) : null)}
             className={`flex-1 py-2 text-sm rounded-lg transition ${i > step && !isValid ? "cursor-not-allowed opacity-50" : ""} ${
               step === i
-                ? "bg-emerald-500 text-white font-semibold"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-emerald-500 text-white md:text-[14px] text-[10px] font-semibold"
+                : "text-neutral-400 md:text-[14px] text-[10px] hover:text-white"
             }`}
           >
             {s}

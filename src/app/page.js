@@ -85,10 +85,10 @@ export default function Home() {
 
   return (
     <main
-      className={`min-h-screen bg-neutral-950 text-white flex transition-all duration-500 ${!hasStarted ? "justify-center" : ""}`}
+      className={`min-h-screen bg-neutral-950 text-white flex lg:flex-row flex-col transition-all duration-500 ${!hasStarted ? "items-center justify-center" : ""}`}
     >
       <div
-        className={`p-6 overflow-y-auto transition-all duration-500 ${hasStarted ? "w-full md:w-1/2 border-r border-neutral-800" : "w-full max-w-xl"}`}
+        className={`p-6 overflow-y-auto transition-all duration-500 ${hasStarted ? "w-full lg:w-1/2 border-r border-neutral-800 flex" : "w-full max-w-xl"}`}
       >
         <StepForm
           data={formData}
@@ -99,7 +99,7 @@ export default function Home() {
       </div>
 
       {hasStarted && (
-        <div className="hidden md:block w-1/2 p-6 overflow-y-auto bg-neutral-900">
+        <div className="w-full lg:w-1/2 h-full min-h-[50vh] lg:h-screen p-4 lg:p-6 overflow-hidden bg-neutral-900 relative">
           <ResumePreview
             data={aiData ?? formData}
             isAI={!!aiData}
