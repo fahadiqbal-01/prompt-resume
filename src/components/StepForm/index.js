@@ -77,8 +77,7 @@ export default function StepForm({ data, onChange, onGenerate, loading }) {
         <p className=" font-light text-sm text-white/70 mt-1 ">
           Developed & Designed byㅤ
           <a
-            href="https://fahadiqbal.vercel.app/"
-            target="_blank"
+            href="mailto:your@email.com"
             className=" underline text-emerald-500 "
           >
             Fahad Iqbal
