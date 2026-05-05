@@ -8,7 +8,7 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
   const containerRef = useRef(null);
   const dragBoundaryRef = useRef(null);
 
-  // Data helpers - Prioritize AI polished fields
+
   const displaySummary = isAI ? data.aiSummary : data.summary;
   const displayExperience = Array.isArray(
     isAI ? data.aiExperience : data.experience,
@@ -48,7 +48,6 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
           {isAI ? "AI-Enhanced Preview" : "Live Preview"}
         </p>
 
-        {/* Updated A4 PDF Export Button */}
         <PDFDownloadLink
           document={<ResumePDF data={data} isAI={isAI} />}
           fileName={`${data.name || "resume"}.pdf`}
@@ -125,7 +124,6 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
         </motion.div>
       )}
 
-      {/* Visual HTML Preview Card (Always visible) */}
       <div
         ref={dragBoundaryRef}
         className="relative flex-1 cursor-move overflow-hidden min-h-[500px] border border-dashed border-neutral-800 rounded-2xl bg-neutral-950/50"
