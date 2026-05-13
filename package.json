@@ -12,6 +12,7 @@
     "@openrouter/sdk": "^0.12.25",
     "@react-pdf/renderer": "^4.5.1",
     "@tailwindcss/postcss": "^4.2.4",
+    "firebase": "^12.13.0",
     "framer-motion": "^12.38.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",

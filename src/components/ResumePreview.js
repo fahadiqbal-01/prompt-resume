@@ -126,7 +126,7 @@ export default function ResumePreview({ data, isAI, onAddSkill }) {
 
       <div
         ref={dragBoundaryRef}
-        className="relative flex-1 cursor-move overflow-hidden min-h-[500px] border border-dashed border-neutral-800 rounded-2xl bg-neutral-950/50"
+        className="relative flex-1 cursor-move overflow-hidden min-h-125 border border-dashed border-neutral-800 rounded-2xl bg-neutral-950/50"
       >
         <motion.div
           drag
