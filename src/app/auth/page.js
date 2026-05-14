@@ -48,7 +48,7 @@ export default function LoginPage() {
 
       if (error?.code === "auth/unauthorized-domain") {
         alert(
-          "Domain not authorized. Please add this URL to the Firebase Console authorized domains.",
+          `Domain (${window.location.hostname}) not authorized. Please add it to the Firebase Console > Authentication > Settings > Authorized domains.`,
         );
         return;
       }
