@@ -44,13 +44,16 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, provider);
       await saveTokenAndContinue(result.user);
     } catch (error) {
-      console.error("Google sign-in error:", error.code, error.message);
+      console.error("Google sign-in error:", error?.code, error?.message);
 
-      // Fallback to redirect if popup is blocked or fails due to environment restrictions
-      if (
-        error?.code === "auth/popup-blocked" ||
-        error?.code === "auth/popup-closed-by-user"
-      ) {
+      if (error?.code === "auth/unauthorized-domain") {
+        alert(
+          "Domain not authorized. Please add this URL to the Firebase Console authorized domains.",
+        );
+        return;
+      }
+
+      if (error?.code === "auth/popup-blocked") {
         await signInWithRedirect(auth, provider);
         return;
       }
