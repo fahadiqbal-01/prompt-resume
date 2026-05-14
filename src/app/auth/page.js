@@ -44,11 +44,16 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, provider);
       await saveTokenAndContinue(result.user);
     } catch (error) {
-      if (error?.code === "auth/popup-blocked") {
+      console.error("Google sign-in error:", error.code, error.message);
+
+      // Fallback to redirect if popup is blocked or fails due to environment restrictions
+      if (
+        error?.code === "auth/popup-blocked" ||
+        error?.code === "auth/popup-closed-by-user"
+      ) {
         await signInWithRedirect(auth, provider);
         return;
       }
-      console.error("Google sign-in failed:", error.code, error.message);
     } finally {
       setLoading(false);
     }
